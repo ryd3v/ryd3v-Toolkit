@@ -54,7 +54,7 @@ def preflight_checks():
 
 
 def show_progress_indicator(running):
-    symbols = itertools.cycle('[-\\|/]')
+    symbols = itertools.cycle('-\\|/')
     while running.is_set():
         sys.stdout.write(next(symbols))
         sys.stdout.flush()
@@ -216,30 +216,52 @@ def run_dirb(url, wordlist, output_file=None):
         print(f"Error executing Dirb: {e.output}")
 
 
-def scan_target(ip, start_port=1, end_port=65535, output_file="out.txt"):
-    # TCP Scan
-    open_tcp_ports = scan_tcp_ports(ip, start_port=start_port, end_port=end_port)
-    # UDP Scan
-    open_udp_ports = scan_udp_ports(ip, start_port=start_port, end_port=end_port)
+def scan_target(ip, start_port=1, end_port=65535, output_file=None):
+    # Perform TCP and UDP scans
+    tcp_scan_results = scan_tcp_ports(ip, start_port, end_port)
+    udp_scan_results = scan_udp_ports(ip, start_port, end_port)
 
-    # Writing results to the output file
-    with open(output_file, 'w') as f:
-        f.write("Open TCP ports on {}: {}\n".format(ip, open_tcp_ports))
-        f.write("Open UDP ports on {}: {}\n".format(ip, open_udp_ports))
+    # Combine the results into a single string
+    combined_results = f"Open TCP ports on {ip}: {tcp_scan_results}\nOpen UDP ports on {ip}: {udp_scan_results}"
 
-    print("Open TCP ports on {}: {}".format(ip, open_tcp_ports))
-    print("Open UDP ports on {}: {}".format(ip, open_udp_ports))
+    # Write results to file if specified
+    if output_file:
+        with open(output_file, 'w') as f:
+            f.write(combined_results)
+
+    # Return the combined results
+    return combined_results
 
 
 def run_nmap_scan(ip):
+    nmap_results = ""
     try:
-        command = f"nmap -Pn -sS -sV -A {ip} -oN scan.txt"
+        command = f"nmap -Pn -sS -sV -A {ip}"
+
+        # Start progress indicator
+        running = threading.Event()
+        running.set()
+        progress_thread = threading.Thread(target=show_progress_indicator, args=(running,))
+        progress_thread.start()
+
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
         for line in process.stdout:
             print(line, end='')
+            nmap_results += line
         process.wait()
+
+        # Stop progress indicator
+        running.clear()
+        progress_thread.join()
+
+        # Optionally, save to file as well
+        with open('scan.txt', 'w') as file:
+            file.write(nmap_results)
+
+        return nmap_results
     except subprocess.CalledProcessError as e:
         print(f"Error executing nmap: {e.output}")
+        return None
 
 
 def generate_pdf_report(file_name, scan_data, target, scan_type):
@@ -267,6 +289,8 @@ def main():
     tcp_scan_results = ""
     udp_scan_results = ""
     nikto_results = ""
+    nmap_results = ""
+    full_scan_results = ""
 
     while True:
         print("Welcome to ryd3v Toolkit!")
@@ -344,18 +368,19 @@ def main():
 
         elif choice == 6:
             ip = input("Enter the IP address to scan: ")
-            scan_target(ip)
+            full_scan_results = scan_target(ip)
+            print(full_scan_results)
 
         elif choice == 7:
             ip = input("Enter the IP address to scan with nmap: ")
-            run_nmap_scan(ip)
+            nmap_results = run_nmap_scan(ip)
             print("Nmap scan results saved to scan.txt.")
 
         elif choice == 8:
-            if tcp_scan_results or udp_scan_results or nikto_results:
-                combined_results = f"{tcp_scan_results}\n{udp_scan_results}\n{nikto_results}"
+            if tcp_scan_results or udp_scan_results or nikto_results or full_scan_results:
+                combined_results = f"{tcp_scan_results}\n{udp_scan_results}\n{nikto_results}\n{full_scan_results}"
                 report_file = "Ryd3v_Toolkit_Report.pdf"
-                target = "Your target information"  # Set this appropriately
+                target = ip  # or another way to specify the target
                 scan_type = "Comprehensive Scan"
                 generate_pdf_report(report_file, combined_results, target, scan_type)
                 print(f"Report generated and saved as {report_file}")
