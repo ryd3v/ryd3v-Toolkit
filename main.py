@@ -377,8 +377,8 @@ def main():
             print("Nmap scan results saved to scan.txt.")
 
         elif choice == 8:
-            if tcp_scan_results or udp_scan_results or nikto_results or full_scan_results:
-                combined_results = f"{tcp_scan_results}\n{udp_scan_results}\n{nikto_results}\n{full_scan_results}"
+            if tcp_scan_results or udp_scan_results or nikto_results or nmap_results or full_scan_results:
+                combined_results = f"{tcp_scan_results}\n{udp_scan_results}\n{nikto_results}\n{nmap_results}\n{full_scan_results}"
                 report_file = "Ryd3v_Toolkit_Report.pdf"
                 target = ip  # or another way to specify the target
                 scan_type = "Comprehensive Scan"
