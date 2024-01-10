@@ -1,13 +1,13 @@
 #  Title: ryd3v Toolkit
 #  Description: Cybersecurity enumeration Tool
-#  Author: Ryan Collins
-#  Date: 2023
+#  Author: Ryan Collins(ryd3v.com)
+#  Date: 2024
 #  TCP Port Scanning.
 #  UDP Port Scanning.
 #  Scan with Nikto.
 #  Netdiscover (must be root!)
 #
-# Copyright 2023 Ryan Collins
+# Copyright 2024 Ryan Collins
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
