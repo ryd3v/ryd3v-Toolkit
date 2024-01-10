@@ -7,7 +7,7 @@
 Ryd3v Toolkit is a Python program that provides various cybersecurity-related tasks. Currently, it includes a port
 scanning feature that allows users to scan open ports on a given IP address, Scan a URL with Nikto, web directory
 scanning with dirb, and Netdiscover to find network attached devices.
-
+![ALT](Screenshot.png)
 ## Features
 
 - TCP/UDP Scan for open ports on a specified IP address or IP address range.
@@ -15,6 +15,7 @@ scanning with dirb, and Netdiscover to find network attached devices.
 - Run Netdiscover (requires root!)
 - Web directory scanning with dirb
 - nmap scanning
+- Report generation
 
 ## Prerequisites
 
